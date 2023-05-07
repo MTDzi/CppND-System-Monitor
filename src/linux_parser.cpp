@@ -266,7 +266,7 @@ std::string LinuxParser::Ram(int pid) {
         std::istringstream iss(line);
         std::string vm_size, actual_value, kB;
         if (iss >> vm_size >> actual_value >> kB) {
-            return actual_value;
+            return std::to_string(static_cast<int>(1e-3 * std::stof(actual_value)));
         }
       }
     } 

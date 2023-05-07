@@ -20,7 +20,7 @@ int Process::Pid() const {
 float Process::CpuUtilization() const {
     long active_jiffies = LinuxParser::ActiveJiffies(pid_);
     long jiffies = LinuxParser::Jiffies();
-    return 100.0f * active_jiffies / jiffies;
+    return 1.0f * active_jiffies / jiffies;
 }
 
 // Return the command that generated this process

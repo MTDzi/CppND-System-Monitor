@@ -22,13 +22,9 @@ Processor& System::Cpu() {
     return cpu_;
 }
 
-// Return a container composed of the system's processes
-vector<Process>& System::Processes() {
-    vector<int> current_pids = LinuxParser::Pids();
-    for (int &pid : current_pids) {
-        
-    }
 
+// Return a container composed of the system's processes
+vector<Process>& System::Processes() {    
     // We need to look for two types of PIDs:
     // A. Those that are in the current_pids but not in processes_
     // B. Those that are in the processes_ but not in the current_pids
@@ -39,7 +35,8 @@ vector<Process>& System::Processes() {
     // For both, we'll create set containers to easily perform std::set_difference
 
     // The set of current PIDs is easy
-    set<int> current_pids_set = set(current_pids.begin(), current_pids.end());
+    vector<int> current_pids_vector = LinuxParser::Pids();
+    set<int> current_pids_set = set(current_pids_vector.begin(), current_pids_vector.end());
     
     // The set of tracked PIDs is a bit more complicated
     set<int> tracked_pids_set;
@@ -64,6 +61,7 @@ vector<Process>& System::Processes() {
         std::inserter(dead_pids, dead_pids.begin())
     );
 
+    // Add new processes
     for (int new_pid : new_pids) {
         string command = LinuxParser::Command(new_pid);
         string ram = LinuxParser::Ram(new_pid);
@@ -72,34 +70,55 @@ vector<Process>& System::Processes() {
 
         processes_.push_back(Process(new_pid, user, command));
     }
+
+    // Remove dead processes
+    processes_.erase(
+        std::remove_if(
+            processes_.begin(),
+            processes_.end(),
+            [&dead_pids](const Process &proc) {
+                return (dead_pids.count(proc.Pid()) > 0);
+            }
+        ),
+        processes_.end()
+    );
+
+    // Finally, sort the processes by CPU usage
+    std::sort(processes_.begin(), processes_.end());
     
     return processes_;
 }
+
 
 // DONE: Return the system's kernel identifier (string)
 std::string System::Kernel() {
     return LinuxParser::Kernel();
 }
 
+
 // DONE: Return the system's memory utilization
 float System::MemoryUtilization() {
     return LinuxParser::MemoryUtilization();
 }
+
 
 // DONE: Return the operating system name
 std::string System::OperatingSystem() {
     return LinuxParser::OperatingSystem();
 }
 
+
 // Return the number of processes actively running on the system
 int System::RunningProcesses() {
     return LinuxParser::RunningProcesses();
 }
 
+
 // Return the total number of processes on the system
 int System::TotalProcesses() {
     return LinuxParser::TotalProcesses();
 }
+
 
 // Return the number of seconds since the system started running
 long int System::UpTime() {
