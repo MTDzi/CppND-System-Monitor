@@ -66,7 +66,6 @@ vector<Process>& System::Processes() {
         string command = LinuxParser::Command(new_pid);
         string ram = LinuxParser::Ram(new_pid);
         string user = LinuxParser::User(new_pid);
-        long up_time = LinuxParser::UpTime(new_pid);
 
         processes_.push_back(Process(new_pid, user, command));
     }
